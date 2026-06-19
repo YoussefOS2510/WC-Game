@@ -862,3 +862,187 @@ h1, h2, h3, h4, h5, h6 {
   color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
+
+/* ==================== MOBILE RESPONSIVENESS MEDIA QUERIES ==================== */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 8px;
+    align-items: center;
+  }
+  
+  .app-logo {
+    font-size: 1.3rem;
+    gap: 8px;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .title-section h1 {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  .title-section p {
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .leaderboard-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .controls-section {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding: 12px 8px;
+  }
+
+  .stats-container {
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    padding: 12px 8px;
+  }
+
+  .stat-val {
+    font-size: 1.3rem;
+  }
+
+  .stat-lbl {
+    font-size: 0.65rem;
+  }
+
+  /* Match Cards */
+  .match-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .team-display {
+    width: 38%;
+  }
+
+  .team-name {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 85px;
+  }
+
+  .score-digit {
+    font-size: 1.3rem;
+    width: 24px;
+  }
+
+  .match-score-display {
+    width: 24%;
+    gap: 4px;
+  }
+
+  .match-meta {
+    font-size: 0.75rem;
+  }
+
+  .match-affects-banner {
+    font-size: 0.7rem;
+    padding-top: 8px;
+  }
+
+  /* Admin Dashboard Forms */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .admin-card {
+    padding: 16px;
+  }
+
+  .tabs-header {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-row {
+    padding: 12px;
+  }
+
+  .player-identity {
+    gap: 10px;
+  }
+
+  .rank-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .player-name {
+    font-size: 0.9rem;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .points-val {
+    font-size: 1.2rem;
+  }
+
+  .points-lbl {
+    font-size: 0.6rem;
+  }
+
+  /* Expanded drawer selections list layout */
+  .selection-pill {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .selection-pill > div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+
+  .selection-team {
+    font-size: 0.85rem;
+  }
+  
+  .award-pill {
+    padding: 8px 10px;
+  }
+}
+
