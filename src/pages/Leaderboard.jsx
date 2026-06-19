@@ -12,6 +12,7 @@ import {
   Star 
 } from 'lucide-react';
 import { calculatePlayerPoints } from '../utils/scoring';
+import TeamFlag from '../components/TeamFlag';
 
 export default function Leaderboard({ players, matches, settings }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -182,9 +183,10 @@ export default function Leaderboard({ players, matches, settings }) {
                             <span className="selection-lbl">
                               <Star size={14} style={{ color: 'var(--primary)' }} /> Pot 1 Selection
                             </span>
-                            <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <TeamFlag teamName={team} size="sm" />
                               <span className="selection-team">{team}</span>
-                              <span className="selection-points" style={{ marginLeft: '10px' }}>
+                              <span className="selection-points">
                                 {player.breakdown?.pot1?.[team] || 0} pts
                               </span>
                             </div>
@@ -197,9 +199,10 @@ export default function Leaderboard({ players, matches, settings }) {
                             <span className="selection-lbl">
                               <Star size={14} style={{ color: 'var(--secondary)' }} /> Pot 2 Selection
                             </span>
-                            <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <TeamFlag teamName={player.selections.pot2} size="sm" />
                               <span className="selection-team">{player.selections.pot2}</span>
-                              <span className="selection-points" style={{ marginLeft: '10px' }}>
+                              <span className="selection-points">
                                 {player.breakdown?.pot2?.[player.selections.pot2] || 0} pts
                               </span>
                             </div>
@@ -212,9 +215,10 @@ export default function Leaderboard({ players, matches, settings }) {
                             <span className="selection-lbl">
                               <Star size={14} style={{ color: 'var(--text-dark)' }} /> Pot 3 Selection
                             </span>
-                            <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <TeamFlag teamName={player.selections.pot3} size="sm" />
                               <span className="selection-team">{player.selections.pot3}</span>
-                              <span className="selection-points" style={{ marginLeft: '10px' }}>
+                              <span className="selection-points">
                                 {player.breakdown?.pot3?.[player.selections.pot3] || 0} pts
                               </span>
                             </div>
@@ -227,9 +231,10 @@ export default function Leaderboard({ players, matches, settings }) {
                             <span className="selection-lbl">
                               <Sparkles size={14} style={{ color: 'var(--secondary)' }} /> Dark Horse
                             </span>
-                            <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <TeamFlag teamName={team} size="sm" />
                               <span className="selection-team">{team}</span>
-                              <span className="selection-points" style={{ marginLeft: '10px', background: 'rgba(236, 64, 122, 0.15)', color: '#f472b6' }}>
+                              <span className="selection-points" style={{ background: 'rgba(236, 64, 122, 0.15)', color: '#f472b6' }}>
                                 {player.breakdown?.darkHorses?.[team] || 0} pts
                               </span>
                             </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Info, Search, Filter } from 'lucide-react';
 import { normalizeTeamName } from '../utils/scoring';
+import TeamFlag from '../components/TeamFlag';
 
 export default function Matches({ matches, players }) {
   const [filterStatus, setFilterStatus] = useState('ALL');
@@ -140,9 +141,7 @@ export default function Matches({ matches, players }) {
                 <div className="match-teams-container">
                   {/* Home Team */}
                   <div className="team-display">
-                    <div className="team-flag-placeholder">
-                      {getAbbreviation(match.homeTeam)}
-                    </div>
+                    <TeamFlag teamName={match.homeTeam} size="lg" />
                     <span className="team-name">{match.homeTeam}</span>
                   </div>
 
@@ -161,9 +160,7 @@ export default function Matches({ matches, players }) {
 
                   {/* Away Team */}
                   <div className="team-display">
-                    <div className="team-flag-placeholder" style={{ background: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)' }}>
-                      {getAbbreviation(match.awayTeam)}
-                    </div>
+                    <TeamFlag teamName={match.awayTeam} size="lg" />
                     <span className="team-name">{match.awayTeam}</span>
                   </div>
                 </div>
