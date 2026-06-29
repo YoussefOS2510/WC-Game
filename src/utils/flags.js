@@ -7,6 +7,11 @@ export function getTeamFlagUrl(teamName) {
   
   // Mapping for World Cup participating nations and predictions selections
   const flagsMap = {
+    'bosnia & herzegovina': 'ba',
+    'bosnia': 'ba',
+    'cape verde': 'cv',
+    'dr congo': 'cd',
+    'democratic republic of the congo': 'cd',
     'argentina': 'ar',
     'spain': 'es',
     'france': 'fr',

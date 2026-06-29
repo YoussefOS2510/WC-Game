@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Tv, ShieldAlert, Sparkles } from 'lucide-react';
+import { Trophy, Tv, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react';
 import { getSettings, getMatches, getPlayers, seedDatabase } from './services/db';
 import Leaderboard from './pages/Leaderboard';
 import Matches from './pages/Matches';
 import Admin from './pages/Admin';
+import Substitution from './pages/Substitution';
 import './App.css';
 
 export default function App() {
@@ -87,6 +88,12 @@ export default function App() {
               <Tv size={16} /> Matches
             </button>
             <button 
+              className={`nav-link ${activePage === 'substitution' ? 'active' : ''}`}
+              onClick={() => setActivePage('substitution')}
+            >
+              <RefreshCw size={16} /> Team Swap
+            </button>
+            <button 
               className={`nav-link ${activePage === 'admin' ? 'active' : ''}`}
               onClick={() => setActivePage('admin')}
             >
@@ -116,6 +123,15 @@ export default function App() {
               <Matches 
                 matches={matches} 
                 players={players} 
+              />
+            )}
+            {activePage === 'substitution' && (
+              <Substitution 
+                players={players} 
+                matches={matches} 
+                settings={settings} 
+                onRefresh={loadData}
+                triggerToast={triggerToast}
               />
             )}
             {activePage === 'admin' && (

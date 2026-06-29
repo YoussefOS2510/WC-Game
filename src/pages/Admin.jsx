@@ -15,6 +15,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { seedDatabase, saveSettings, saveMatch, savePlayer, deleteMatch, deletePlayer, syncMatchesFromAPI, isFirebaseActive } from '../services/db';
+import { getDeterministicPassword } from '../utils/auth';
 
 export default function Admin({ players, matches, settings, onRefresh, triggerToast, isAuthenticated, setIsAuthenticated }) {
   const [password, setPassword] = useState('');
@@ -96,6 +97,13 @@ export default function Admin({ players, matches, settings, onRefresh, triggerTo
           Player Visibility ({players.length})
         </button>
         <button 
+          className={`tab-btn ${activeTab === 'passwords' ? 'active' : ''}`}
+          onClick={() => setActiveTab('passwords')}
+        >
+          <Lock size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+          Player Passwords
+        </button>
+        <button 
           className={`tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
           onClick={() => setActiveTab('matches')}
         >
@@ -116,6 +124,12 @@ export default function Admin({ players, matches, settings, onRefresh, triggerTo
           <PlayersTab 
             players={players} 
             onRefresh={onRefresh} 
+            triggerToast={triggerToast} 
+          />
+        )}
+        {activeTab === 'passwords' && (
+          <PasswordsTab 
+            players={players} 
             triggerToast={triggerToast} 
           />
         )}
@@ -423,6 +437,51 @@ function PlayersTab({ players, onRefresh, triggerToast }) {
     }
   };
 
+  const handleUndoSwaps = async (player) => {
+    if (!player.swaps || player.swaps.length === 0) {
+      triggerToast('This player has no swaps to undo.', 'error');
+      return;
+    }
+
+    const confirmMsg = `Are you sure you want to reset all team swaps for ${player.name}?
+This will restore their original choices and clear their point penalties.`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      const updated = JSON.parse(JSON.stringify(player));
+      const sortedSwaps = [...updated.swaps].sort((a, b) => a.timestamp - b.timestamp);
+      
+      const originalSelections = {};
+      sortedSwaps.forEach(swap => {
+        const key = swap.index !== null && swap.index !== undefined 
+          ? `${swap.slot}-${swap.index}` 
+          : swap.slot;
+        if (!originalSelections[key]) {
+          originalSelections[key] = swap.swappedOut;
+        }
+      });
+
+      Object.entries(originalSelections).forEach(([key, originalTeam]) => {
+        if (key.includes('-')) {
+          const [slot, indexStr] = key.split('-');
+          const idx = parseInt(indexStr);
+          updated.selections[slot][idx] = originalTeam;
+        } else {
+          updated.selections[key] = originalTeam;
+        }
+      });
+
+      updated.swaps = [];
+
+      await savePlayer(updated);
+      triggerToast(`Successfully reset all selections and penalties for ${player.name}!`, 'success');
+      onRefresh();
+    } catch (err) {
+      triggerToast('Failed to undo swaps: ' + err.message, 'error');
+    }
+  };
+
   return (
     <div className="admin-card glass-panel" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
@@ -467,6 +526,16 @@ function PlayersTab({ players, onRefresh, triggerToast }) {
               </div>
               
               <div className="item-actions">
+                {player.swaps && player.swaps.length > 0 && (
+                  <button 
+                    className="btn btn-secondary btn-sm" 
+                    onClick={() => handleUndoSwaps(player)}
+                    title="Undo swaps and restore original selections"
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid rgba(236, 64, 122, 0.3)', color: '#f472b6' }}
+                  >
+                    <RefreshCw size={12} /> Undo Swaps
+                  </button>
+                )}
                 {/* Visibility Toggle Switch */}
                 <button 
                   className={`btn btn-secondary btn-sm`} 
@@ -672,6 +741,7 @@ function MatchesTab({ matches, settings, onRefresh, triggerToast }) {
                 onChange={(e) => setMatchForm(prev => ({ ...prev, stage: e.target.value }))}
               >
                 <option value="GROUP">Group Stage</option>
+                <option value="R32">Round of 32</option>
                 <option value="R16">Round of 16</option>
                 <option value="QF">Quarterfinal</option>
                 <option value="SF">Semifinal</option>
@@ -761,5 +831,83 @@ function MatchesTab({ matches, settings, onRefresh, triggerToast }) {
         </div>
       </div>
     </>
+  );
+}
+
+// ==================== PASSWORDS TAB ====================
+function PasswordsTab({ players, triggerToast }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const filteredPlayers = players.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCopy = (player) => {
+    const pwd = player.password || getDeterministicPassword(player.id);
+    navigator.clipboard.writeText(pwd);
+    triggerToast(`Password for ${player.name} copied to clipboard!`, 'success');
+  };
+
+  const handleCopyAll = () => {
+    const text = players.map(p => {
+      const pwd = p.password || getDeterministicPassword(p.id);
+      return `${p.name}: ${pwd}`;
+    }).join('\n');
+    navigator.clipboard.writeText(text);
+    triggerToast('All passwords copied to clipboard!', 'success');
+  };
+
+  return (
+    <div className="admin-card glass-panel" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <h3 className="admin-card-title" style={{ margin: 0 }}>
+          <Lock size={18} /> Player Authorization Passwords
+        </h3>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search players..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: '200px', height: '36px', padding: '0 12px' }}
+          />
+          <button className="btn btn-secondary btn-sm" onClick={handleCopyAll}>
+            Copy All
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '500px', overflowY: 'auto', paddingRight: '4px' }}>
+        {filteredPlayers.length === 0 ? (
+          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            No players found.
+          </div>
+        ) : (
+          filteredPlayers.map(player => {
+            const pwd = player.password || getDeterministicPassword(player.id);
+            return (
+              <div key={player.id} className="admin-list-item">
+                <div className="item-info">
+                  <span className="item-title">{player.name}</span>
+                  <span className="item-subtitle" style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: 'var(--secondary)', marginTop: '4px' }}>
+                    Password: <strong style={{ letterSpacing: '1px' }}>{pwd}</strong>
+                  </span>
+                </div>
+                
+                <div className="item-actions">
+                  <button 
+                    className="btn btn-secondary btn-sm" 
+                    onClick={() => handleCopy(player)}
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
   );
 }

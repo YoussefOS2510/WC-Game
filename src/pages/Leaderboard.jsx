@@ -9,7 +9,9 @@ import {
   TrendingUp, 
   EyeOff, 
   ShieldAlert, 
-  Star 
+  Star,
+  RefreshCw,
+  ArrowRight
 } from 'lucide-react';
 import { calculatePlayerPoints } from '../utils/scoring';
 import TeamFlag from '../components/TeamFlag';
@@ -171,6 +173,12 @@ export default function Leaderboard({ players, matches, settings }) {
                 {/* Expanded Details Drawer */}
                 {isExpanded && (
                   <div className="player-details" onClick={(e) => e.stopPropagation()}>
+                    {player.breakdown?.swapPenalty > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.05)', borderLeft: '3px solid var(--danger)', padding: '8px 12px', borderRadius: '4px', fontSize: '0.8rem', color: '#fca5a5', marginBottom: '8px', gridColumn: '1 / -1' }}>
+                        <ShieldAlert size={14} style={{ color: 'var(--danger)' }} />
+                        <span>Active Substitution Penalty: <strong>-{player.breakdown.swapPenalty} points</strong> deducted from total score.</span>
+                      </div>
+                    )}
                     
                     {/* Team Selections Column */}
                     <div className="details-section">
@@ -284,6 +292,35 @@ export default function Leaderboard({ players, matches, settings }) {
 
                       </div>
                     </div>
+
+                    {/* Substitution History Column */}
+                    {player.breakdown?.swaps && player.breakdown.swaps.length > 0 && (
+                      <div className="details-section" style={{ gridColumn: '1 / -1', marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+                        <div className="details-section-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <RefreshCw size={14} className="text-secondary" /> Substitution History
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {player.breakdown.swaps.map((swap, sIdx) => (
+                            <div key={sIdx} className="selection-pill" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(236, 64, 122, 0.03)', borderLeft: '3px solid var(--secondary)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <TeamFlag teamName={swap.swappedOut} size="sm" />
+                                  <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)' }}>{swap.swappedOut}</span>
+                                </div>
+                                <ArrowRight size={14} style={{ color: 'var(--text-dark)' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <TeamFlag teamName={swap.swappedIn} size="sm" />
+                                  <strong style={{ color: 'var(--success)' }}>{swap.swappedIn}</strong>
+                                </div>
+                              </div>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--danger)', fontWeight: 'bold' }}>
+                                -5 pts penalty
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                   </div>
                 )}

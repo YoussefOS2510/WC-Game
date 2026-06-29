@@ -96,16 +96,22 @@ export function calculatePlayerPoints(player, matches, settings) {
       bestPlayer: 0,
       topScorer: 0,
       bestGoalkeeper: 0
-    }
+    },
+    swapPenalty: 0,
+    swaps: []
   };
 
   let totalPoints = 0;
 
   // 1. Pot 1 Selections (usually 2 teams)
   const pot1Teams = player.selections?.pot1 || [];
-  pot1Teams.forEach(team => {
+  pot1Teams.forEach((team, index) => {
     let teamPoints = 0;
+    const swap = (player.swaps || []).find(s => s.slot === 'pot1' && s.index === index);
+    const excludedMatchIds = swap ? (swap.excludedMatchIds || []) : [];
+
     matches.forEach(match => {
+      if (excludedMatchIds.includes(match.id)) return;
       teamPoints += calculateMatchPointsForTeam(
         match,
         team,
@@ -124,7 +130,11 @@ export function calculatePlayerPoints(player, matches, settings) {
   const pot2Team = player.selections?.pot2 || '';
   if (pot2Team) {
     let teamPoints = 0;
+    const swap = (player.swaps || []).find(s => s.slot === 'pot2');
+    const excludedMatchIds = swap ? (swap.excludedMatchIds || []) : [];
+
     matches.forEach(match => {
+      if (excludedMatchIds.includes(match.id)) return;
       teamPoints += calculateMatchPointsForTeam(
         match,
         pot2Team,
@@ -143,7 +153,11 @@ export function calculatePlayerPoints(player, matches, settings) {
   const pot3Team = player.selections?.pot3 || '';
   if (pot3Team) {
     let teamPoints = 0;
+    const swap = (player.swaps || []).find(s => s.slot === 'pot3');
+    const excludedMatchIds = swap ? (swap.excludedMatchIds || []) : [];
+
     matches.forEach(match => {
+      if (excludedMatchIds.includes(match.id)) return;
       teamPoints += calculateMatchPointsForTeam(
         match,
         pot3Team,
@@ -160,13 +174,17 @@ export function calculatePlayerPoints(player, matches, settings) {
 
   // 4. Dark Horse Selections (2 teams)
   const darkHorses = player.selections?.darkHorses || [];
-  darkHorses.forEach(team => {
+  darkHorses.forEach((team, index) => {
     let teamPoints = 0;
+    const swap = (player.swaps || []).find(s => s.slot === 'darkHorses' && s.index === index);
+    const excludedMatchIds = swap ? (swap.excludedMatchIds || []) : [];
+
     // Determine base points for this team
     const baseWinPoints = getTeamBaseWinPoints(team, settings);
     const baseDrawPoints = getTeamBaseDrawPoints(team, settings);
     
     matches.forEach(match => {
+      if (excludedMatchIds.includes(match.id)) return;
       teamPoints += calculateMatchPointsForTeam(
         match,
         team,
@@ -198,6 +216,14 @@ export function calculatePlayerPoints(player, matches, settings) {
     totalPoints += awardPointsBonus;
   }
 
+  // Apply Swap Penalty (-5 points per swap)
+  const swapCount = (player.swaps || []).length;
+  const swapPenalty = swapCount * 5;
+  totalPoints -= swapPenalty;
+  
+  breakdown.swapPenalty = swapPenalty;
+  breakdown.swaps = player.swaps || [];
+
   return { totalPoints, breakdown };
 }
 
@@ -211,8 +237,14 @@ export function calculatePlayerPoints(player, matches, settings) {
 export function getTeamBaseWinPoints(team, settings) {
   const t = normalizeTeamName(team);
   
-  const pot1 = ['argentina', 'spain', 'france', 'england', 'portugal', 'brazil', 'netherlands'];
-  const pot2 = ['morocco', 'croatia', 'japan', 'switzerland', 'senegal', 'colombia'];
+  const pot1 = [
+    'argentina', 'spain', 'france', 'england', 'portugal', 'brazil', 'netherlands',
+    'united states', 'usa', 'mexico', 'canada', 'belgium', 'germany'
+  ];
+  const pot2 = [
+    'morocco', 'croatia', 'japan', 'switzerland', 'senegal', 'colombia',
+    'uruguay', 'iran', 'south korea', 'korea', 'korea republic', 'ecuador', 'austria', 'australia'
+  ];
   
   if (pot1.includes(t)) {
     return settings.pot1WinPoints || 3;
@@ -227,8 +259,14 @@ export function getTeamBaseWinPoints(team, settings) {
 export function getTeamBaseDrawPoints(team, settings) {
   const t = normalizeTeamName(team);
   
-  const pot1 = ['argentina', 'spain', 'france', 'england', 'portugal', 'brazil', 'netherlands'];
-  const pot2 = ['morocco', 'croatia', 'japan', 'switzerland', 'senegal', 'colombia'];
+  const pot1 = [
+    'argentina', 'spain', 'france', 'england', 'portugal', 'brazil', 'netherlands',
+    'united states', 'usa', 'mexico', 'canada', 'belgium', 'germany'
+  ];
+  const pot2 = [
+    'morocco', 'croatia', 'japan', 'switzerland', 'senegal', 'colombia',
+    'uruguay', 'iran', 'south korea', 'korea', 'korea republic', 'ecuador', 'austria', 'australia'
+  ];
   
   if (pot1.includes(t)) {
     return settings.pot1DrawPoints !== undefined ? settings.pot1DrawPoints : 1;
